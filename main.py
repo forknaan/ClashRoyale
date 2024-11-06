@@ -19,14 +19,13 @@ def getCanvasDetails(app):
 
 
 def onAppStart(app):
-    app.appStart = True
+    app.HomePage = True
     getCanvasDetails(app)
 
 
 def redrawAll(app):    
-    if app.appStart:
-        home.bg(app)
-        home.battleButton(app)
+    if app.HomePage:
+        home.home(app)
 
 
 def onMouseClick(app, x1, y1):

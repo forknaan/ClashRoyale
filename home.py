@@ -5,6 +5,8 @@ from cmu_graphics import *
 import math
 import string
 import random
+import time
+
 
 
 def bg(app):
@@ -26,15 +28,15 @@ def bg(app):
     drawRect(app.x0, app.y0, app.w, app.h, border='black', fill=None)
 
 def battleButton(app):
-    drawRect(app.x0 + app.w/2, app.h*0.75, app.w*0.4, app.h*0.1,
+    drawRect(app.x0 + app.w/2, app.h*0.75, app.w*0.5, app.h*0.1,
              fill=gradient(rgb(255, 208, 83), rgb(255, 188, 44), start='top'),
              align='center', border='black', borderWidth=app.w*0.001)
     drawLabel('Battle', app.x0 + app.w/2, app.h*0.75, fill=rgb(255, 255, 204),
-              border='black', borderWidth=app.w*0.001, font='cursive',
+              border='black', borderWidth=app.w*0.001, font='Supercell-Magic',
               size=app.h*0.05)
 
 def nameCard(app):
-    drawRect(app.x0 + app.w/2, app.h*0.15, app.w*0.4, app.h*0.05,
+    drawRect(app.x0 + app.w/2, app.h*0.15, app.w*0.4, app.h*0.08,
              fill=gradient(rgb(164,234,255), rgb(122,209,255), start='top'),
              align='center', border='black', borderWidth=app.w*0.001)
     

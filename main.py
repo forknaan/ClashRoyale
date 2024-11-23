@@ -13,7 +13,7 @@ import arena
 def onAppStart(app):
     # Initialisation Methods
     getCanvasDetails(app)
-    app.stepsPerSecond = 60
+    app.stepsPerSecond = 30
     
     # Modes
     app.HomePage = False
@@ -25,18 +25,20 @@ def onAppStart(app):
     
     # Other Variables
     app.time = 0
+    app.playerElixir = 0
+    app.enemyElixir = 0
     app.enemyCards = [play.miniPekka(350, 160, "enemy")] # testing right now, should be Empty
     app.playerCards = [] # The cards on the arena that the player has played
     app.playerDeck = [] # [ classes ]
     app.enemyDeck = [] # The deck the AI uses
     app.cardSelected = "fireSpirit" # testing right now, should be None
-    app.buffer = 4
     app.gameOver = False
 
 
 
     # Testing
-
+    
+    
     app.playerTowers = [play.princessTower(237.5, 640.5, "player"),
                         play.princessTower(516.5, 640.5, "player"),
                         play.kingTower(377, 729, "player")]
@@ -87,6 +89,11 @@ def redrawAll(app):
             
         for card in app.enemyCards:
             card.draw()
+        
+        if app.gameOver:
+            drawRect(app.x0, app.y0, app.w, app.h, fill='grey', opacity=40)
+            drawLabel(f"{app.winner} HAS WON!!!",
+                      app.x0+app.w/2, app.y0+app.h/2)
 
 def onMousePress(app, x, y):
     if app.battleArena:
@@ -97,13 +104,13 @@ def onMousePress(app, x, y):
 def onStep(app):
     getCanvasDetails(app)
     app.time += 1
-    
-    
     if app.battleArena:
 
         if app.gameOver:
             return
         
+        play.elixirOnStep(app)
+
         #Movement of cards on the arena
         for card in app.playerCards[:]:
             card.onStep(app)

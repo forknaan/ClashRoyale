@@ -412,7 +412,7 @@ class fireSpirit(playingCard):
         self.maxHealth = self.health
         self.dmg = 207
         self.hitSpeed = 1000
-        self.movementSpeed = 3   # "Very Fast"
+        self.movementSpeed = 2.7   # "Very Fast"
         self.range = 3
         self.targets = "All"
         self.atttackType = "Ranged"
@@ -439,6 +439,7 @@ class fireSpirit(playingCard):
     
     def attack(self):
         self.alive = False
+        self.health = 0
 
 # Blank Card with template for all Properties
 
@@ -489,17 +490,18 @@ class towers:
         self.alive = True
     
     def onStep(self, app):
-        if self.mode == "Battling":
-            self.fight(app)
-            if self.target.health <= 0:
-                self.target.alive = False
-                self.target = None
-                self.mode = "Idle"
-        elif self.mode == "Idle":
-            target = self.getTarget(app)
-            if self.targetInRange(target) and self.state == "Active":
-                self.mode = "Battling"
-                self.target = target
+        if self.alive:
+            if self.mode == "Battling":
+                self.fight(app)
+                if self.target.health <= 0:
+                    self.target.alive = False
+                    self.target = None
+                    self.mode = "Idle"
+            elif self.mode == "Idle":
+                target = self.getTarget(app)
+                if self.targetInRange(target) and self.state == "Active":
+                    self.mode = "Battling"
+                    self.target = target
     
     def fight(self, app):
         if self.cooldown % (app.stepsPerSecond * self.hitSpeed) == 0:
@@ -603,6 +605,21 @@ class kingTower(towers):
     def activate(self):
         self.state = "Active"
 
+
+##############################
+# Elixir and Other Mechanics #
+##############################
+
+def elixirOnStep(app):
+    if app.playerElixir < 10:
+        app.playerElixir += 1/45
+    if app.playerElixir > 10:
+        app.playerElixir = 10
+    
+    if app.enemyElixir < 10:
+        app.enemyElixir += 1/45
+    if app.enemyElixir > 10:
+        app.enemyElixir = 10
 
 
 # All stats gained from https://statsroyale.com (with slight modifications)

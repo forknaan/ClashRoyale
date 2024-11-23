@@ -25,24 +25,25 @@ def onAppStart(app):
     
     # Other Variables
     app.time = 0
-    app.enemyCards = [play.knight(350, 160, "enemy")]
-    app.playerCards = []
-    app.deckCards = [] # [ ( class, True/False ) ]
-    app.cardSelected = "miniPekka" # testing right now, should be None
+    app.enemyCards = [play.miniPekka(350, 160, "enemy")] # testing right now, should be Empty
+    app.playerCards = [] # The cards on the arena that the player has played
+    app.playerDeck = [] # [ classes ]
+    app.enemyDeck = [] # The deck the AI uses
+    app.cardSelected = "fireSpirit" # testing right now, should be None
     app.buffer = 4
+    app.gameOver = False
 
 
-    
-    
+
     # Testing
 
-    app.playerTowers = [play.princessTower(237.5, 640.5),
-                        play.princessTower(516.5, 640.5),
-                        play.kingTower(377, 729)]
+    app.playerTowers = [play.princessTower(237.5, 640.5, "player"),
+                        play.princessTower(516.5, 640.5, "player"),
+                        play.kingTower(377, 729, "player")]
     
-    app.enemyTowers = [play.princessTower(237.5, 159.5),
-                       play.princessTower(516.5, 159.5),
-                       play.kingTower(377, 71)]    
+    app.enemyTowers = [play.princessTower(237.5, 159.5, "enemy"),
+                       play.princessTower(516.5, 159.5, "enemy"),
+                       play.kingTower(377, 71, "enemy")]    
     
 
 
@@ -75,20 +76,22 @@ def redrawAll(app):
     if app.battleArena:
         arena.drawArena(app)
         
+        for tower in app.playerTowers:
+            tower.draw()
+        
+        for tower in app.enemyTowers:
+            tower.draw()
+        
         for card in app.playerCards:
             card.draw()
             
         for card in app.enemyCards:
             card.draw()
-            
-        for i in range(4):
-            pass
-
 
 def onMousePress(app, x, y):
     if app.battleArena:
-        
-        play.placeCard(app, x, y)
+        if not app.gameOver:
+            play.placeCard(app, x, y, "player")
             
 
 def onStep(app):
@@ -97,8 +100,11 @@ def onStep(app):
     
     
     if app.battleArena:
+
+        if app.gameOver:
+            return
         
-        #Movement of card on the arena
+        #Movement of cards on the arena
         for card in app.playerCards[:]:
             card.onStep(app)
             if card.alive == False:
@@ -108,6 +114,22 @@ def onStep(app):
             card.onStep(app)
             if card.alive == False:
                 app.enemyCards.remove(card)
+
+        for tower in app.playerTowers[:]:
+            tower.onStep(app)
+        
+        for tower in app.enemyTowers[:]:
+            tower.onStep(app)
+
+
+        if app.enemyTowers[2].alive == False:
+            app.gameOver = True
+            app.winner = "player"
+            print(app.winner)
+        elif app.playerTowers[2].alive == False:
+            app.gameOver = True
+            app.winner = "enemy"
+            print(app.winner)
 
 
 

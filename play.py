@@ -14,7 +14,7 @@ import time
 ##################
 
 
-def placeCard(app, x, y):
+def placeCard(app, x, y, side):
     # Placing Selected Card onto Arena
     if app.cardSelected != None:
         x0, y0 = 149, 425
@@ -26,13 +26,16 @@ def placeCard(app, x, y):
             else:
                 y = 437.5
                 x = ((x-x0)//25)*25+x0+12.5
-            app.playerCards.append(initCard(app.cardSelected, x, y,
-                                            "player"))
-            app.cardSelected = None
+            if side == "player":
+                app.playerCards.extend(initCard(app.cardSelected,x,y,"player"))
+            else:
+                app.enemyCards.extend(initCard(app.cardSelected,x,y,"enemy"))
+            #app.cardSelected = None
 
 class playingCard:
     def __init__(self):
         self.alive = True
+        self.state = "Active"
     
     def getAllCards(self):
         return ['miniPekka', 'bomber', 'knight', 'skeletons', 'wizard',
@@ -42,13 +45,17 @@ class playingCard:
 
         if self.mode == "Battling":
             self.fight(app)
-            if self.enemy.health <= 0:
-                self.enemy.alive = False
-                self.enemy = None
+            if self.target.health <= 0:
+                self.target.alive = False
+                self.target = None
                 self.mode = "Moving"
         elif self.mode == "Moving":
             closest = self.closestTarget(app, self.side)
             self.move(app, closest, self.side)
+            
+            if self.cooldown % (app.stepsPerSecond * self.hitSpeed) != 0:
+                self.cooldown += 1
+
     
     def move(self, app, closestTarget, side):
 
@@ -60,7 +67,7 @@ class playingCard:
             check = self.inEnemyRangeCheck(app, side)
 
         if check:
-            self.enemy = closestTarget
+            self.target = closestTarget
             self.mode = "Battling"
         else:
             self.moveCard(point)
@@ -68,10 +75,11 @@ class playingCard:
     
     def fight(self, app):
         if self.cooldown % (app.stepsPerSecond * self.hitSpeed) == 0:
+            self.target.health -= self.dmg
             self.attack()
         self.cooldown += 1
-
-
+        if self.target.state == "Idle":
+            self.target.activate()
     
     
     def closestTarget(self, app, side):
@@ -101,10 +109,11 @@ class playingCard:
         closest = None
         radius = self.sight * 25
         for i in towers:
-            dist = distance(self.x, self.y, i.x, i.y)
-            if dist <= radius and dist <= lowDist:
-                lowDist = dist
-                closest = i
+            if i.alive:
+                dist = distance(self.x, self.y, i.x, i.y)
+                if dist <= radius and dist <= lowDist:
+                    lowDist = dist
+                    closest = i
         if closest == None:
             return templateCard()
         
@@ -123,7 +132,6 @@ class playingCard:
             return templateCard()
         
         return closest
-
 
     def moveCard(self, point):
         # Move Card to the closest Point
@@ -145,7 +153,7 @@ class playingCard:
             return False
     
     def getPointAir(self, closestTarget, side, app):
-        if closestTarget.x == 1000: # Ensures no target can be seen by card
+        if closestTarget.x == 1000: # Checks if no target is seen by card
             if side == "player":
                 point = self.closestTower(app.enemyTowers)
             else:
@@ -154,6 +162,7 @@ class playingCard:
             point = (closestTarget.x, closestTarget.y)
         return point
 
+    # If no enemies in range then find the point for the card to move towards
     def getPointGround(self, closestTarget, side):
         if closestTarget.x == 1000:
             if side == "player":
@@ -170,17 +179,17 @@ class playingCard:
             if self.x < 377:
                 point = (237.5, 425)
             else:
-                point = (516.5, 425)
+                point = (517.5, 425)
         elif self.y > 375:
             if self.x < 377:
                 point = (237.5, 375)
             else:
-                point = (516.5, 375)
+                point = (517.5, 375)
         elif self.y > 131:
             if self.x < 377:
                 point = (237.5, 131)
             else:
-                point = (516.5, 131)
+                point = (517.5, 131)
         else:
             point = (377, 71)
         return point
@@ -188,19 +197,19 @@ class playingCard:
     def closestPointEnemy(self):
         if self.y < 375:
             if self.x < 375:
-                point = (237.5, 375)
+                point = (237.5, 378)
             else:
-                point = (516.5, 375)
+                point = (517.5, 378)
         elif self.y < 425:
             if self.x < 377:
-                point = (237.5, 425)
+                point = (237.5, 428)
             else:
-                point = (516.5, 425)
+                point = (517.5, 428)
         elif self.y < 679:
             if self.x < 377:
-                point = (237.5, 679)
+                point = (237.5, 682)
             else:
-                point = (516.5, 679)
+                point = (517.5, 681)
         else:
             point = (377, 729)
         return point
@@ -235,7 +244,7 @@ class miniPekka(playingCard):
         self.sight = 4
         self.cooldown = 0
         
-        if side == "Enemy":
+        if side == "enemy":
             self.angle = 180
         else:
             self.angle = 0
@@ -249,7 +258,7 @@ class miniPekka(playingCard):
         drawLabel(self.health, self.x, self.y-10, fill='white')
     
     def attack(self):
-        self.enemy.health -= self.dmg
+        pass
 
 # Card 2
 class knight(playingCard):
@@ -271,7 +280,7 @@ class knight(playingCard):
         self.sight = 4
         self.cooldown = 0
 
-        if side == "Enemy":
+        if side == "enemy":
             self.angle = 180
         else:
             self.angle = 0
@@ -285,80 +294,152 @@ class knight(playingCard):
         drawLabel(self.health, self.x, self.y-10, fill='white')
     
     def attack(self):
-        self.enemy.health -= self.dmg
+        pass
 
 # Card 3
-class skeletons(playingCard):
-    def __init__(self, x=0, y=0):
+class skeleton(playingCard):
+    def __init__(self, x=0, y=0, side=None):
         super().__init__()
         self.health = 81
         self.maxHealth = self.health
         self.dmg = 81
         self.hitSpeed = 1
-        self.movementSpeed = 8   # "Fast"
-        self.range = "Short"
+        self.movementSpeed = 2   # "Fast"
+        self.range = 2
         self.targets = "Ground"
         self.atttackType = "Melee"
         self.cost = 1
         self.movementType = "Ground"
-    
+        self.side = side
+        self.target = None
+        self.sight = 4
+        self.cooldown = 0
+        self.mode = "Moving"
+
+        if side == "enemy":
+            self.angle = 180
+        else:
+            self.angle = 0
+
+        self.x = x
+        self.y = y
+
     def draw(self):
+        drawCircle(self.x, self.y, 5, fill='red')
+        drawLabel("Skeleton", self.x, self.y, fill='white')
+        drawLabel(self.health, self.x, self.y-10, fill='white')
+
+    def attack(self):
         pass
 
 # Card 4
 class bomber(playingCard):
-    def __init__(self, x=0, y=0):
+    def __init__(self, x=0, y=0, side=None):
         super().__init__()
         self.health = 332
         self.maxHealth = self.health
         self.dmg = 225
         self.hitSpeed = 1.8
-        self.movementSpeed = 6    # "Medium"
+        self.movementSpeed = 1    # "Medium"
         self.range = 4.5
         self.targets = "Ground"
         self.atttackType = "Ranged"
         self.cost = 2
         self.movementType = "Ground"
+        self.mode = "Moving"
+        self.sight = 6
+        self.cooldown = 0
+        self.side = side
+        self.target = None
+
+        if side == "enemy":
+            self.angle = 180
+        else:
+            self.angle = 0
+
+        self.x = x
+        self.y = y
     
     def draw(self):
+        drawCircle(self.x, self.y, 5, fill='red')
+        drawLabel("Bomber", self.x, self.y, fill='white')
+        drawLabel(self.health, self.x, self.y-10, fill='white')
+
+    def attack(self):
         pass
 
 # Card 5
 class wizard(playingCard):
-    def __init__(self, x=0, y=0):
+    def __init__(self, x=0, y=0, side=None):
         super().__init__()
         self.health = 754
         self.maxHealth = self.health
         self.dmg = 281
         self.hitSpeed = 1.4
-        self.movementSpeed = 6    # "Medium"
+        self.movementSpeed = 1    # "Medium"
         self.range = 5.5
         self.targets = "All"
         self.atttackType = "Ranged"
         self.cost = 5
         self.movementType = "Ground"
-    
+        self.mode = "Moving"
+        self.sight = 6
+        self.cooldown = 0
+        self.side = side
+        self.target = None
+
+        if side == "enemy":
+            self.angle = 180
+        else:
+            self.angle = 0
+        
+        self.x = x
+        self.y = y
+
     def draw(self):
+        drawCircle(self.x, self.y, 5, fill='red')
+        drawLabel("Wizard", self.x, self.y, fill='white')
+        drawLabel(self.health, self.x, self.y-10, fill='white')
+    
+    def attack(self):
         pass
 
 # Card 6
 class fireSpirit(playingCard):
-    def __init__(self, x=0, y=0):
+    def __init__(self, x=0, y=0, side=None):
         super().__init__()
         self.health = 230
         self.maxHealth = self.health
         self.dmg = 207
-        self.hitSpeed = "Instant"
-        self.movementSpeed = 10   # "Very Fast"
-        self.range = 2
+        self.hitSpeed = 1000
+        self.movementSpeed = 3   # "Very Fast"
+        self.range = 3
         self.targets = "All"
         self.atttackType = "Ranged"
         self.cost = 1
         self.movementType = "Ground"
+        self.mode = "Moving"
+        self.sight = 6
+        self.cooldown = 0
+        self.side = side
+        self.target = None
+        
+        if side == "enemy":
+            self.angle = 180
+        else:
+            self.angle = 0
+        
+        self.x = x
+        self.y = y
     
     def draw(self):
-        pass
+        drawCircle(self.x, self.y, 5, fill='red')
+        drawLabel("Fire Spirit", self.x, self.y, fill='white')
+        drawLabel(self.health, self.x, self.y-10, fill='white')
     
+    def attack(self):
+        self.alive = False
+
 # Blank Card with template for all Properties
 
 class templateCard(playingCard):
@@ -383,17 +464,19 @@ class templateCard(playingCard):
 
 def initCard(s, x, y, side):
     if s == "miniPekka":
-        return miniPekka(x, y, side)
+        return [miniPekka(x, y, side)]
     elif s == "bomber":
-        return bomber(x, y, side)
+        return [bomber(x, y, side)]
     elif s == "knight":
-        return knight(x, y, side)
+        return [knight(x, y, side)]
     elif s == "skeletons":
-        return skeletons(x, y, side)
+        return [skeleton(x+20, y, side),
+                skeleton(x-20, y, side),
+                skeleton(x, y+20, side)]
     elif s == "wizard":
-        return wizard(x, y, side)
+        return [wizard(x, y, side)]
     elif s == "fireSpirit":
-        return fireSpirit(x, y, side)
+        return [fireSpirit(x, y, side)]
 
 
 ##########
@@ -406,12 +489,67 @@ class towers:
         self.alive = True
     
     def onStep(self, app):
-        pass
+        if self.mode == "Battling":
+            self.fight(app)
+            if self.target.health <= 0:
+                self.target.alive = False
+                self.target = None
+                self.mode = "Idle"
+        elif self.mode == "Idle":
+            target = self.getTarget(app)
+            if self.targetInRange(target) and self.state == "Active":
+                self.mode = "Battling"
+                self.target = target
     
+    def fight(self, app):
+        if self.cooldown % (app.stepsPerSecond * self.hitSpeed) == 0:
+            self.target.health -= self.dmg
+            self.attack()
+        self.cooldown += 1
+
+    def getTarget(self, app):
+        possibleTargets = [] # If cards are attacking tower, they take priority
+        if self.side == "player":
+            for card in app.enemyCards:
+                if card.target == self:
+                    possibleTargets.append(card)
+        else:
+            for card in app.playerCards:
+                if card.target == self:
+                    possibleTargets.append(card)
+        if possibleTargets == []:
+            if self.side == "player":
+                closestCard = self.closestCard(app.enemyCards)
+            else:
+                closestCard = self.closestCard(app.playerCards)
+        else:
+            closestCard = self.closestCard(possibleTargets)
+        return closestCard
+        
+    def closestCard(self, cards):
+        lowDist = 1000
+        closest = None
+        radius = self.range * 25
+        for i in cards:
+            dist = distance(self.x, self.y, i.x, i.y)
+            if dist <= radius and dist <= lowDist:
+                lowDist = dist
+                closest = i
+        if closest == None:
+            return templateCard()
+        return closest
+    
+    def targetInRange(self, target):
+        dist = distance(self.x, self.y, target.x, target.y)
+        if dist <= self.range*25:
+            return True
+        else:
+            return False
+
 
 class princessTower(towers):
     
-    def __init__(self, x, y):
+    def __init__(self, x, y, side):
         super().__init__()
         self.health = 3052
         self.dmg = 109
@@ -421,13 +559,24 @@ class princessTower(towers):
         self.atttackType = "Ranged"
         self.x = x
         self.y = y
+        self.mode = "Idle"
+        self.target = None
+        self.side = side
+        self.state = "Active"
+        self.cooldown = 0
 
     def draw(self):
+        if self.alive:
+            drawRect(self.x-37.5, self.y-37.5, 25*3, 25*3, fill='green')
+            drawLabel("Princess Tower", self.x, self.y, fill='white')
+            drawLabel(self.health, self.x, self.y-10, fill='white')
+    
+    def attack(self):
         pass
 
 class kingTower(towers):
     
-    def __init__(self, x, y):
+    def __init__(self, x, y, side):
         super().__init__()
         self.health = 4824
         self.dmg = 109
@@ -437,7 +586,23 @@ class kingTower(towers):
         self.atttackType = "Ranged"
         self.x = x
         self.y = y
-        self.state = "Idle" # Can also be "Active"
+        self.state = "Idle" # Can also be "Active" (The tower is hidden) 
+        self.mode = "Idle" # The tower has no target
+        self.side = side
+        self.cooldown = 0
 
     def draw(self):
+        if self.alive:
+            drawRect(self.x-50, self.y-50, 25*4, 25*4, fill='red')
+            drawLabel("King Tower", self.x, self.y, fill='white')
+            drawLabel(self.health, self.x, self.y-10, fill='white')
+
+    def attack(self):
         pass
+
+    def activate(self):
+        self.state = "Active"
+
+
+
+# All stats gained from https://statsroyale.com (with slight modifications)

@@ -46,3 +46,30 @@ def home(app):
     bg(app)
     battleButton(app)
     nameCard(app)
+
+
+
+def checkClick(app, x, y):
+    if (254 <= x <= 500) and (560 <= y <= 640):
+        clickBattleButton(app)
+
+    
+
+def clickBattleButton(app):
+    app.HomePage = False
+    app.battleArena = True
+    app.enemyDeck = play.randomizer(app)
+    app.playerDeck = play.randomizer(app)
+    app.playerCardSelected = None
+    app.enemyCardSelected = None
+    app.enemyCards = []
+    app.playerCards = []
+    app.playerTowers = [play.princessTower(237.5, 640.5, "player"),
+                        play.princessTower(516.5, 640.5, "player"),
+                        play.kingTower(377, 729, "player")]
+    app.enemyTowers = [play.princessTower(237.5, 159.5, "enemy"),
+                       play.princessTower(516.5, 159.5, "enemy"),
+                       play.kingTower(377, 71, "enemy")]
+    app.playerElixir = 0
+    app.enemyElixir = 0
+    

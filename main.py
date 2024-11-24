@@ -16,8 +16,8 @@ def onAppStart(app):
     app.stepsPerSecond = 30
     
     # Modes
-    app.HomePage = False
-    app.battleArena = True
+    app.HomePage = True
+    app.battleArena = False
     
     # Arena Specific variables
     app.arenaRows = 30
@@ -27,18 +27,14 @@ def onAppStart(app):
     app.time = 0
     app.playerElixir = 0
     app.enemyElixir = 0
-    app.enemyCards = [play.miniPekka(350, 160, "enemy")] # testing right now, should be Empty
+    app.enemyCards = [] # testing right now, should be Empty
     app.playerCards = [] # The cards on the arena that the player has played
     app.playerDeck = [] # [ classes ]
     app.enemyDeck = [] # The deck the AI uses
-    app.cardSelected = "fireSpirit" # testing right now, should be None
+    app.playerCardSelected = None # testing right now, should be None
+    app.enemyCardSelected = None
     app.gameOver = False
-
-
-
     # Testing
-    
-    
     app.playerTowers = [play.princessTower(237.5, 640.5, "player"),
                         play.princessTower(516.5, 640.5, "player"),
                         play.kingTower(377, 729, "player")]
@@ -96,9 +92,14 @@ def redrawAll(app):
                       app.x0+app.w/2, app.y0+app.h/2)
 
 def onMousePress(app, x, y):
+
+    if app.HomePage:
+        home.checkClick(app, x, y)
+
+
     if app.battleArena:
         if not app.gameOver:
-            play.placeCard(app, x, y, "player")
+            play.placeCard(app, x, y, "player", app.playerCardSelected)
             
 
 def onStep(app):

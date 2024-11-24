@@ -14,32 +14,61 @@ import time
 ##################
 
 
-def placeCard(app, x, y, side):
+def placeCard(app, x, y, side, cardSelected):
     # Placing Selected Card onto Arena
-    if app.cardSelected != None:
+    if cardSelected != None:
+        x, y = getCardPlacementLocation(side, x, y)
+        if side == "player":
+            if app.playerElixir - cardSelected.cost > 0:
+                app.playerElixir -= cardSelected.cost
+                app.playerCards.extend(initCard(str(cardSelected),x,y,"player"))
+                #app.playerCardSelected = None
+                app.playerDeck.remove(cardSelected)
+                app.playerDeck.append(cardSelected)
+        else:
+            if app.enemyElixir - cardSelected.cost > 0:
+                app.enemyElixir -= cardSelected.cost
+                app.enemyCards.extend(initCard(str(cardSelected),x,y,"enemy"))
+                #app.enemyCardSelected = None
+                app.enemyDeck.remove(cardSelected)
+                app.enemyDeck.append(cardSelected)
+
+def getCardPlacementLocation(side, x, y):
+    if side == "player":
         x0, y0 = 149, 425
         x1, y1 = 605, 780
-        if x0 <= x <= x1:
-            if y0 <= y <= y1:
-                x = ((x-x0)//25)*25+x0+12.5
-                y = ((y-y0)//25)*25+y0+12.5
-            else:
-                y = 437.5
-                x = ((x-x0)//25)*25+x0+12.5
+    else:
+        x0, y0 = 149, 20
+        x1, y1 = 605, 375
+    if x0 <= x <= x1:
+        if y0 <= y <= y1:
+            x = ((x-x0)//25)*25+x0+12.5
+            y = ((y-y0)//25)*25+y0+12.5
+        else:
             if side == "player":
-                app.playerCards.extend(initCard(app.cardSelected,x,y,"player"))
+                y = 437.5
             else:
-                app.enemyCards.extend(initCard(app.cardSelected,x,y,"enemy"))
-            #app.cardSelected = None
+                y = 362.5
+            x = ((x-x0)//25)*25+x0+12.5
+    return x, y
+
+
+# Gets a random Deck and returns it
+def randomizer(app):
+    shuffled = getAllCards()
+    random.shuffle(shuffled)
+    for i in range(len(shuffled)):
+        shuffled[i] = initCard(shuffled[i])[0]
+    return shuffled
+
+def getAllCards():
+    return ['miniPekka', 'bomber', 'knight', 'skeletons', 'wizard',
+            'fireSpirit'] # Add Tesla or Elixir Collecter maybe
 
 class playingCard:
     def __init__(self):
         self.alive = True
         self.state = "Active"
-    
-    def getAllCards(self):
-        return ['miniPekka', 'bomber', 'knight', 'skeletons', 'wizard',
-                'fireSpirit'] # Add Tesla or Elixir Collecter maybe
         
     def onStep(self, app):
 
@@ -224,7 +253,7 @@ class playingCard:
 # Card 1
 class miniPekka(playingCard):
     moving = []
-    card = "Images\miniPekka.png"
+    card = "Images/miniPekka/miniPekkaCard.png"
     
     def __init__(self, x=0, y=0, side=None):
         super().__init__()
@@ -260,8 +289,17 @@ class miniPekka(playingCard):
     def attack(self):
         pass
 
+    def __repr__(self):
+        return "miniPekka"
+    
+    def drawCard(self, x, y):
+        drawImage(miniPekka.card, x, y)
+
 # Card 2
 class knight(playingCard):
+    card = "Images/knight/knightCard.png"
+
+
     def __init__(self, x=0, y=0, side=None):
         super().__init__()
         self.health = 1766
@@ -296,8 +334,17 @@ class knight(playingCard):
     def attack(self):
         pass
 
+    def __repr__(self):
+        return "knight"
+    
+    def drawCard(self, x, y):
+        drawImage(knight.card, x, y)
+        
+
 # Card 3
 class skeleton(playingCard):
+    card = "Images/skeleton/skeletonCard.png"
+
     def __init__(self, x=0, y=0, side=None):
         super().__init__()
         self.health = 81
@@ -332,8 +379,16 @@ class skeleton(playingCard):
     def attack(self):
         pass
 
+    def __repr__(self):
+        return "skeletons"
+    
+    def drawCard(self, x, y):
+        drawImage(skeleton.card, x, y)
+
 # Card 4
 class bomber(playingCard):
+    card = "Images/bomber/bomberCard.png"
+
     def __init__(self, x=0, y=0, side=None):
         super().__init__()
         self.health = 332
@@ -368,8 +423,17 @@ class bomber(playingCard):
     def attack(self):
         pass
 
+    def __repr__(self):
+        return "bomber"
+    
+    def drawCard(self, x, y):
+        drawImage(bomber.card, x, y)
+
+
 # Card 5
 class wizard(playingCard):
+    card = "Images/wizard/wizardCard.png"
+
     def __init__(self, x=0, y=0, side=None):
         super().__init__()
         self.health = 754
@@ -404,8 +468,16 @@ class wizard(playingCard):
     def attack(self):
         pass
 
+    def __repr__(self):
+        return "wizard"
+    
+    def drawCard(self, x, y):
+        drawImage(wizard.card, x, y)
+
 # Card 6
 class fireSpirit(playingCard):
+    card = "Images/fireSpirit/fireSpiritCard.png"
+
     def __init__(self, x=0, y=0, side=None):
         super().__init__()
         self.health = 230
@@ -441,6 +513,12 @@ class fireSpirit(playingCard):
         self.alive = False
         self.health = 0
 
+    def __repr__(self):
+        return "fireSpirit"
+    
+    def drawCard(self, x, y):
+        drawImage(fireSpirit.card, x, y)
+
 # Blank Card with template for all Properties
 
 class templateCard(playingCard):
@@ -463,7 +541,7 @@ class templateCard(playingCard):
 
 
 
-def initCard(s, x, y, side):
+def initCard(s, x=0, y=0, side=None):
     if s == "miniPekka":
         return [miniPekka(x, y, side)]
     elif s == "bomber":
@@ -478,6 +556,8 @@ def initCard(s, x, y, side):
         return [wizard(x, y, side)]
     elif s == "fireSpirit":
         return [fireSpirit(x, y, side)]
+    elif s == "skeleton":
+        return [skeleton(x, y, side)]
 
 
 ##########
@@ -576,6 +656,9 @@ class princessTower(towers):
     def attack(self):
         pass
 
+    def __repr__(self):
+        return "princessTower"
+
 class kingTower(towers):
     
     def __init__(self, x, y, side):
@@ -604,6 +687,10 @@ class kingTower(towers):
 
     def activate(self):
         self.state = "Active"
+
+
+    def __repr__(self):
+        return "kingTower"
 
 
 ##############################

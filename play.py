@@ -14,24 +14,60 @@ import time
 ##################
 
 
-def placeCard(app, x, y, side, cardSelected):
+def checkClick(app, x, y):
+    #Check if click on arena
+    if (149 <= x <= 605) and (20 <= y <= 780):
+        # Makes sure not to spawn card if click in tower
+        if not checkClickInTower(x, y):
+            placeCard(app, x, y, "player")
+    
+    if 648 <= x <= 795:
+        if 24 <= y <= 204:
+            app.playerCardSelected = app.playerDeck[0]
+            app.playerCardSelectedIndex = 0
+        elif 214 <= y <= 394:
+            app.playerCardSelected = app.playerDeck[1]
+            app.playerCardSelectedIndex = 1
+        elif 404 <= y <= 584:
+            app.playerCardSelected = app.playerDeck[2]
+            app.playerCardSelectedIndex = 2
+        elif 594 <= y <= 774:
+            app.playerCardSelected = app.playerDeck[3]
+            app.playerCardSelectedIndex = 3
+
+
+def checkClickInTower(x, y):
+    if ((200 <= x <= 276) and (603 <= y <= 679)) or \
+        ((200 <= x <= 276) and (122 <= y <= 197)) or \
+        ((478 <= x <= 554) and (603 <= y <= 679)) or \
+        ((478 <= x <= 554) and (122 <= y <= 197)) or \
+        ((327 <= x <= 428) and (21 <= y <= 121)) or \
+        ((327 <= x <= 428) and (679 <= y <= 780)):
+        return True
+    else:
+        return False
+
+def placeCard(app, x, y, side):
     # Placing Selected Card onto Arena
-    if cardSelected != None:
+    if (app.playerCardSelected != None and side == "player") or \
+        (app.enemyCardSelected != None and side == "enemy"):
         x, y = getCardPlacementLocation(side, x, y)
         if side == "player":
-            if app.playerElixir - cardSelected.cost > 0:
-                app.playerElixir -= cardSelected.cost
-                app.playerCards.extend(initCard(str(cardSelected),x,y,"player"))
-                #app.playerCardSelected = None
-                app.playerDeck.remove(cardSelected)
-                app.playerDeck.append(cardSelected)
+            if app.playerElixir - app.playerCardSelected.cost > 0:
+                app.playerElixir -= app.playerCardSelected.cost
+                app.playerCards.extend(initCard(str(app.playerCardSelected),
+                                                x,y,"player"))
+                app.playerDeck.append(app.playerDeck.pop\
+                                      (app.playerCardSelectedIndex))
+                app.playerCardSelected = None
         else:
-            if app.enemyElixir - cardSelected.cost > 0:
-                app.enemyElixir -= cardSelected.cost
-                app.enemyCards.extend(initCard(str(cardSelected),x,y,"enemy"))
-                #app.enemyCardSelected = None
-                app.enemyDeck.remove(cardSelected)
-                app.enemyDeck.append(cardSelected)
+            if app.enemyElixir - app.enemyCardSelected.cost > 0:
+                app.enemyElixir -= app.enemyCardSelected.cost
+                app.enemyCards.extend(initCard(str(app.enemyCardSelected),
+                                               x,y,"enemy"))
+                app.enemyDeck.append(app.enemyDeck.pop\
+                                     (app.enemyCardSelectedIndex))
+                app.enemyCardSelected = None
 
 def getCardPlacementLocation(side, x, y):
     if side == "player":
@@ -104,7 +140,6 @@ class playingCard:
     
     def fight(self, app):
         if self.cooldown % (app.stepsPerSecond * self.hitSpeed) == 0:
-            self.target.health -= self.dmg
             self.attack()
         self.cooldown += 1
         if self.target.state == "Idle":
@@ -242,6 +277,20 @@ class playingCard:
         else:
             point = (377, 729)
         return point
+    
+    def getEnemiesInRange(self, x, y, side, radius):
+        enemies = []
+        if side == "player":
+            allEnemies = app.enemyCards
+        else:
+            allEnemies = app.playerCards
+        
+        for i in allEnemies:
+            if distance(x, y, i.x, i.y) <= radius*25:
+                enemies.append(i)
+        
+        return enemies
+
 
 
 
@@ -252,9 +301,12 @@ class playingCard:
 
 # Card 1
 class miniPekka(playingCard):
-    moving = []
     card = "Images/miniPekka/miniPekkaCard.png"
-    
+    # movingPlayer = ["Images/miniPekka/miniPekkaWalkingPlayer1.png",
+    #                 "Images/miniPekka/miniPekkaWalkingPlayer2.png"]
+    # movingEnemy = ["Images/miniPekka/miniPekkaWalkingEnemy1.png", 
+    #                "Images/miniPekka/miniPekkaWalkingEnemy2.png"]
+
     def __init__(self, x=0, y=0, side=None):
         super().__init__()
         self.health = 1361
@@ -272,6 +324,8 @@ class miniPekka(playingCard):
         self.target = None
         self.sight = 4
         self.cooldown = 0
+        self.movingPlayerIndex = 0
+        self.movingEnemyIndex = 0
         
         if side == "enemy":
             self.angle = 180
@@ -282,12 +336,22 @@ class miniPekka(playingCard):
         self.y = y
 
     def draw(self):
+        # if self.mode == "Moving":
+        #     if self.side == "player":
+        #         drawImage(miniPekka.movingPlayer[self.movingPlayerIndex], 
+        #                   self.x, self.y)
+        #         self.movingPlayerIndex = (self.movingPlayerIndex+1)%2
+        #     else:
+        #         drawImage(miniPekka.movingEnemy[self.movingEnemyIndex], 
+        #                   self.x, self.y)
+        #         self.movingEnemyIndex = (self.movingEnemyIndex+1)%2
+        # else:
         drawCircle(self.x, self.y, 5, fill='blue')
         drawLabel("MINI PEKKA", self.x, self.y, fill='white')
         drawLabel(self.health, self.x, self.y-10, fill='white')
     
     def attack(self):
-        pass
+        self.target.health -= self.dmg
 
     def __repr__(self):
         return "miniPekka"
@@ -332,7 +396,7 @@ class knight(playingCard):
         drawLabel(self.health, self.x, self.y-10, fill='white')
     
     def attack(self):
-        pass
+        self.target.health -= self.dmg
 
     def __repr__(self):
         return "knight"
@@ -377,7 +441,7 @@ class skeleton(playingCard):
         drawLabel(self.health, self.x, self.y-10, fill='white')
 
     def attack(self):
-        pass
+        self.target.health -= self.dmg
 
     def __repr__(self):
         return "skeletons"
@@ -406,6 +470,7 @@ class bomber(playingCard):
         self.cooldown = 0
         self.side = side
         self.target = None
+        self.splashRadius = 1
 
         if side == "enemy":
             self.angle = 180
@@ -421,7 +486,9 @@ class bomber(playingCard):
         drawLabel(self.health, self.x, self.y-10, fill='white')
 
     def attack(self):
-        pass
+        for i in self.getEnemiesInRange(self.target.x, self.target.y, \
+                                        self.side, self.splashRadius):
+            i.health -= self.dmg
 
     def __repr__(self):
         return "bomber"
@@ -451,6 +518,7 @@ class wizard(playingCard):
         self.cooldown = 0
         self.side = side
         self.target = None
+        self.splashRadius = 1
 
         if side == "enemy":
             self.angle = 180
@@ -466,7 +534,9 @@ class wizard(playingCard):
         drawLabel(self.health, self.x, self.y-10, fill='white')
     
     def attack(self):
-        pass
+        for i in self.getEnemiesInRange(self.target.x, self.target.y, \
+                                        self.side, self.splashRadius):
+            i.health -= self.dmg
 
     def __repr__(self):
         return "wizard"
@@ -477,6 +547,10 @@ class wizard(playingCard):
 # Card 6
 class fireSpirit(playingCard):
     card = "Images/fireSpirit/fireSpiritCard.png"
+    # movingPlayer = "Images/fireSpirit/fsPA1.png"
+    # attackingPlayer = ["Images/fireSpirit/fsPW1.png",
+    #                    "Images/fireSpirit/fsPW2.png"]
+
 
     def __init__(self, x=0, y=0, side=None):
         super().__init__()
@@ -495,6 +569,11 @@ class fireSpirit(playingCard):
         self.cooldown = 0
         self.side = side
         self.target = None
+        self.splashRadius = 1.5
+        self.movePlayerI = 0
+        self.moveEnemyI = 0
+        self.attackPlayerI = 0
+        self.attackEnemyI = 0
         
         if side == "enemy":
             self.angle = 180
@@ -505,13 +584,51 @@ class fireSpirit(playingCard):
         self.y = y
     
     def draw(self):
+        # if self.side == "player":
+        #     if self.mode == "Moving":
+        #         if self.movePlayerI%12 < 3:
+        #             drawImage(fireSpirit.movingPlayer, self.x-22.5, self.y-25)
+        #         elif self.movePlayerI%12 < 6:
+        #             drawImage(fireSpirit.movingPlayer, self.x-22.5,self.y-27.5)
+        #         elif self.movePlayerI%12 < 9:
+        #             drawImage(fireSpirit.movingPlayer, self.x-22.5, self.y-30)
+        #         elif self.movePlayerI%12 < 12 :
+        #             drawImage(fireSpirit.movingPlayer, self.x-22.5,self.y-27.5)
+        #         self.movePlayerI += 1
+        #     else:
+        #         if self.playerEnemyI <= 3:
+        #             drawImage(fireSpirit.attackingPlayer[0])
+        #             self.attackEnemyI += 1
+        #         else:
+        #             drawImage(fireSpirit.attackingPlayer[1])
+        # else:
+        #     if self.mode == "Moving":
+        #         if self.moveEnemyI%6 < 3:
+        #             drawImage(fireSpirit.movingEnemy[0],
+        #                        self.x, self.y)
+        #         else:
+        #             drawImage(fireSpirit.movingEnemy[0],
+        #                        self.x, self.y-5)
+        #         self.movePlayerI += 1
+        #     else:
+        #         if self.attackEnemyI <= 3:
+        #             drawImage(fireSpirit.attackingEnemy[0])
+        #             self.attackEnemyI += 1
+        #         else:
+        #             drawImage(fireSpirit.attackingEnemy[0])
         drawCircle(self.x, self.y, 5, fill='red')
         drawLabel("Fire Spirit", self.x, self.y, fill='white')
         drawLabel(self.health, self.x, self.y-10, fill='white')
     
     def attack(self):
-        self.alive = False
-        self.health = 0
+        if self.attackPlayerI == 5 or self.attackEnemyI == 5:
+            for i in self.getEnemiesInRange(self.target.x, self.target.y, \
+                                        self.side, self.splashRadius):
+                i.health -= self.dmg
+            self.alive = False
+            self.health = 0
+        else:
+            self.move(app, self.target, self.side)
 
     def __repr__(self):
         return "fireSpirit"
@@ -709,4 +826,7 @@ def elixirOnStep(app):
         app.enemyElixir = 10
 
 
-# All stats gained from https://statsroyale.com (with slight modifications)
+# All stats and cards gained from https://statsroyale.com 
+# (with slight modifications)
+# credits to https://imageresizer.com for the picture resizing
+#https://tenor.com/view/mini-pekka-camiando-gif-26785038 (mini-pekka walking)

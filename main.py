@@ -27,21 +27,23 @@ def onAppStart(app):
     app.time = 0
     app.playerElixir = 0
     app.enemyElixir = 0
-    app.enemyCards = [] # testing right now, should be Empty
+    app.enemyCards = []
     app.playerCards = [] # The cards on the arena that the player has played
-    app.playerDeck = [] # [ classes ]
+    app.playerDeck = []
     app.enemyDeck = [] # The deck the AI uses
-    app.playerCardSelected = None # testing right now, should be None
+    app.playerCardSelected = None
+    app.playerCardSelectedIndex = None
     app.enemyCardSelected = None
+    app.enemyCardSelectedIndex = None
     app.gameOver = False
-    # Testing
+    app.ai = None
     app.playerTowers = [play.princessTower(237.5, 640.5, "player"),
                         play.princessTower(516.5, 640.5, "player"),
                         play.kingTower(377, 729, "player")]
     
     app.enemyTowers = [play.princessTower(237.5, 159.5, "enemy"),
                        play.princessTower(516.5, 159.5, "enemy"),
-                       play.kingTower(377, 71, "enemy")]    
+                       play.kingTower(377, 71, "enemy")]
     
 
 
@@ -99,7 +101,8 @@ def onMousePress(app, x, y):
 
     if app.battleArena:
         if not app.gameOver:
-            play.placeCard(app, x, y, "player", app.playerCardSelected)
+
+            play.checkClick(app, x, y)
             
 
 def onStep(app):
@@ -129,6 +132,7 @@ def onStep(app):
         for tower in app.enemyTowers[:]:
             tower.onStep(app)
 
+        app.ai.onStep(app)
 
         if app.enemyTowers[2].alive == False:
             app.gameOver = True

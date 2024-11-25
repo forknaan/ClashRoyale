@@ -7,6 +7,7 @@ import string
 import random
 import time
 import play
+import ai
 
 
 
@@ -72,4 +73,8 @@ def clickBattleButton(app):
                        play.kingTower(377, 71, "enemy")]
     app.playerElixir = 0
     app.enemyElixir = 0
-    
+    app.enemyCardSelectedIndex = None
+    app.playerCardSelectedIndex = None
+    app.winner = None
+    app.gameOver = False
+    app.ai = ai.lvl1(app)

@@ -105,7 +105,7 @@ class playingCard:
     def __init__(self):
         self.alive = True
         self.state = "Active"
-        
+
     def onStep(self, app):
 
         if self.mode == "Battling":
@@ -326,7 +326,11 @@ class miniPekka(playingCard):
         self.cooldown = 0
         self.movingPlayerIndex = 0
         self.movingEnemyIndex = 0
-        
+        if self.side == "player":
+            self.colour = "blue"
+        else:
+            self.colour = "red"
+
         if side == "enemy":
             self.angle = 180
         else:
@@ -346,7 +350,7 @@ class miniPekka(playingCard):
         #                   self.x, self.y)
         #         self.movingEnemyIndex = (self.movingEnemyIndex+1)%2
         # else:
-        drawCircle(self.x, self.y, 5, fill='blue')
+        drawCircle(self.x, self.y, 5, fill=self.colour)
         drawLabel("MINI PEKKA", self.x, self.y, fill='white')
         drawLabel(self.health, self.x, self.y-10, fill='white')
     
@@ -381,6 +385,10 @@ class knight(playingCard):
         self.target = None
         self.sight = 4
         self.cooldown = 0
+        if self.side == "player":
+            self.colour = "blue"
+        else:
+            self.colour = "red"
 
         if side == "enemy":
             self.angle = 180
@@ -391,7 +399,7 @@ class knight(playingCard):
         self.y = y
     
     def draw(self):
-        drawCircle(self.x, self.y, 5, fill='red')
+        drawCircle(self.x, self.y, 5, fill=self.colour)
         drawLabel("KNIGHT", self.x, self.y, fill='white')
         drawLabel(self.health, self.x, self.y-10, fill='white')
     
@@ -426,6 +434,10 @@ class skeleton(playingCard):
         self.sight = 4
         self.cooldown = 0
         self.mode = "Moving"
+        if self.side == "player":
+            self.colour = "blue"
+        else:
+            self.colour = "red"
 
         if side == "enemy":
             self.angle = 180
@@ -436,7 +448,7 @@ class skeleton(playingCard):
         self.y = y
 
     def draw(self):
-        drawCircle(self.x, self.y, 5, fill='red')
+        drawCircle(self.x, self.y, 5, fill=self.colour)
         drawLabel("Skeleton", self.x, self.y, fill='white')
         drawLabel(self.health, self.x, self.y-10, fill='white')
 
@@ -471,6 +483,10 @@ class bomber(playingCard):
         self.side = side
         self.target = None
         self.splashRadius = 1
+        if self.side == "player":
+            self.colour = "blue"
+        else:
+            self.colour = "red"
 
         if side == "enemy":
             self.angle = 180
@@ -481,7 +497,7 @@ class bomber(playingCard):
         self.y = y
     
     def draw(self):
-        drawCircle(self.x, self.y, 5, fill='red')
+        drawCircle(self.x, self.y, 5, fill=self.colour)
         drawLabel("Bomber", self.x, self.y, fill='white')
         drawLabel(self.health, self.x, self.y-10, fill='white')
 
@@ -519,6 +535,10 @@ class wizard(playingCard):
         self.side = side
         self.target = None
         self.splashRadius = 1
+        if self.side == "player":
+            self.colour = "blue"
+        else:
+            self.colour = "red"
 
         if side == "enemy":
             self.angle = 180
@@ -529,7 +549,7 @@ class wizard(playingCard):
         self.y = y
 
     def draw(self):
-        drawCircle(self.x, self.y, 5, fill='red')
+        drawCircle(self.x, self.y, 5, fill=self.colour)
         drawLabel("Wizard", self.x, self.y, fill='white')
         drawLabel(self.health, self.x, self.y-10, fill='white')
     
@@ -574,6 +594,10 @@ class fireSpirit(playingCard):
         self.moveEnemyI = 0
         self.attackPlayerI = 0
         self.attackEnemyI = 0
+        if self.side == "player":
+            self.colour = "blue"
+        else:
+            self.colour = "red"
         
         if side == "enemy":
             self.angle = 180
@@ -616,19 +640,29 @@ class fireSpirit(playingCard):
         #             self.attackEnemyI += 1
         #         else:
         #             drawImage(fireSpirit.attackingEnemy[0])
-        drawCircle(self.x, self.y, 5, fill='red')
+        # if self.mode == "Battling":
+        #     if self.side == "player":
+        #         self.attackPlayerI += 1
+        #     else:
+        #         self.attackEnemyI += 1
+        drawCircle(self.x, self.y, 5, fill=self.colour)
         drawLabel("Fire Spirit", self.x, self.y, fill='white')
         drawLabel(self.health, self.x, self.y-10, fill='white')
     
     def attack(self):
-        if self.attackPlayerI == 5 or self.attackEnemyI == 5:
-            for i in self.getEnemiesInRange(self.target.x, self.target.y, \
+        # if self.attackPlayerI == 5 or self.attackEnemyI == 5:
+        #     for i in self.getEnemiesInRange(self.target.x, self.target.y, \
+        #                                 self.side, self.splashRadius):
+        #         i.health -= self.dmg
+        #     self.alive = False
+        #     self.health = 0
+        # else:
+        #     self.move(app, self.target, self.side)
+        for i in self.getEnemiesInRange(self.target.x, self.target.y, \
                                         self.side, self.splashRadius):
-                i.health -= self.dmg
-            self.alive = False
-            self.health = 0
-        else:
-            self.move(app, self.target, self.side)
+            i.health -= self.dmg
+        self.alive = False
+        self.health = 0
 
     def __repr__(self):
         return "fireSpirit"

@@ -37,17 +37,32 @@ def battleButton(app):
               border='black', borderWidth=app.w*0.001, font='Supercell-Magic',
               size=app.h*0.05)
 
-def nameCard(app):
-    drawRect(app.x0 + app.w/2, app.h*0.15, app.w*0.4, app.h*0.08,
-             fill=gradient(rgb(164,234,255), rgb(122,209,255), start='top'),
-             align='center', border='black', borderWidth=app.w*0.001)
+
+# Should allow user to enter their name as the user at the begining of program
+# It will then be displayed here
+#def nameCard(app):
+#    drawRect(app.x0 + app.w/2, app.h*0.15, app.w*0.4, app.h*0.08,
+#             fill=gradient(rgb(164,234,255), rgb(122,209,255), start='top'),
+#             align='center', border='black', borderWidth=app.w*0.001)
     
+def gameName(app):
+    drawLabel("CMU", app.x0 + app.w/2, app.h*0.25, font='Supercell-Magic',
+              fill='chartreuse', borderWidth=app.w*0.001, border='black',
+              size=app.h*0.1)
+    drawLabel("ROYALE", app.x0 + app.w/2, app.h*0.375, font='Supercell-Magic',
+              fill='chartreuse', borderWidth=app.w*0.001, border='black', 
+              size=app.h*0.1)
+
 
 def home(app):
     bg(app)
     battleButton(app)
-    nameCard(app)
+    gameName(app)
 
+
+####################
+    #nameCard(app) #
+####################
 
 
 def checkClick(app, x, y):

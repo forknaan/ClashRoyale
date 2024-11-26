@@ -72,3 +72,7 @@ The whole design Docs have been updated to match the current project what is
 being done, with more in-depth detail of all important features and Timelines.
 Overall, there is no massive change to the original game itself.
 (Primarily Added more stuff to Timeline and Algorithmic Plan)
+
+
+(Game is playable, Player cards are Blue and Enemy Cards are Red)
+(Press R to reset the game)

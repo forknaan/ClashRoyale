@@ -1,0 +1,6 @@
+Future Plans (Possible features I plan on adding if I ever come back to this project)
+
+◦    Add a crap ton more cards
+◦    Implement a local/online multiplayer function
+◦    Add animations for all the cards
+◦    Make the collisions more vector based so its smoother

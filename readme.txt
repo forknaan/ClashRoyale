@@ -4,6 +4,33 @@ Description:
     and be allowed to play cards to defeat the opponent's towers and get crowned 
     victory.
 
+
+INSTALLATION:
+
+ - You need to have CMU-Graphics library downloaded, this can be done via a pip
+   command:
+``` pip install cmu_graphics ```
+
+ - There is an extra font that requires downloading, the ttf file is uploaded
+   along with the rest of the files, ENSURE IT IS SAVED AS "Supercell-Magic"
+
+ - The program should run in any IDE however.
+ - CMU-Graphics is kind of weird and it won't let me control the volume of Sounds
+   so I recommend lowering your volume
+ - For the processor it is running on, I reccomend having a computer with a good
+   dicrete graphics card and CPU, for optimum smooth gameplay. 
+
+ - There is one special key 'r' which can be used to run onAppStart simply, however
+   if music is playing already, it won't stop (purely for debugging purposes)/ 
+
+
+
+
+
+
+
+
+
 Competitive Analysis:
     This game is inspired and mainly based off a similar successful game called 
     Clash Royale which is a mobile game. I plan to inherit the original games 
@@ -76,3 +103,16 @@ Overall, there is no massive change to the original game itself.
 
 (Game is playable, Player cards are Blue and Enemy Cards are Red)
 (Press R to reset the game)
+
+
+TP 3 Update:
+Collisions with other characters and edges and towers and river were added.
+There are minor Balance changes to the characters to allow for a more fun experience.
+Local Multiplayer could not be added due to some issues, one being time.
+The AI that was implemented, the idea of how it thinks was re-imagined, I realised
+that the random function is quite frankly very good at playing this game, just tweaking
+the waiting ("thinking") time between each placement can exponentially increase or decrease
+the difficulty.
+
+Other than that, the main plan was main followed, along with the implementation of Sprites
+and a better nicer UI along with Sounds.

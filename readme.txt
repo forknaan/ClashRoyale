@@ -9,10 +9,11 @@ INSTALLATION:
 
  - You need to have CMU-Graphics library downloaded, this can be done via a pip
    command:
-``` pip install cmu_graphics ```
+
+        - pip install cmu_graphics
 
  - There is an extra font that requires downloading, the ttf file is uploaded
-   along with the rest of the files, ENSURE IT IS SAVED AS "Supercell-Magic"
+   along with the rest of the files, ENSURE IT IS INSTALLED AS "Supercell-Magic"
 
  - The program should run in any IDE however.
  - CMU-Graphics is kind of weird and it won't let me control the volume of Sounds
@@ -22,8 +23,6 @@ INSTALLATION:
 
  - There is one special key 'r' which can be used to run onAppStart simply, however
    if music is playing already, it won't stop (purely for debugging purposes)/ 
-
-
 
 
 
@@ -53,25 +52,21 @@ Algorithmic Plan:
     2. There is the collision of characters, how they are to move when colliding
     with other objects. 
         - Doing various checks to ensure no collisions, and if so then move 
-        character relative to their location on the map 
-    (Un-implemented as of MVP)
+        character relative to their location on the map
 
     3. The various different attack methods of each card, from splash damage, to 
     long range firing of projectiles, to instantaneous damage dealing.
-    (Implemented as of MVP)
 
     4. The AI the player will be playing at and how to manage its difficulty
-        - I plan on countering this issue by trying to write down my reasoning
-        of how to play, as if I am the AI, to create a more advanced AI to play
-        against
-    (partially implemented as of MVP)
 
-    (Bonus)
-    5. Implementing Local Multiplayer via Socket.
+    5. Overall, the use of countless classes and each item having its own animations
+    and movement, adds to the total complexity of the program.
+
+    (Bonus - Unimplemented)
+    6. Implementing Local Multiplayer via Socket.
         - I plan on doing this by first adding a loading screen for waiting for
         connections and jsut mapping the connected user as enemy and just 
         translating their moves to the user.
-    (Un-implemented as of MVP)
 
 Timeline Plan:
     Deadlines:
